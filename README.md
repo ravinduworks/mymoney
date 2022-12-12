@@ -67,6 +67,7 @@ python3 -m pip install -r requirements.txt
 ```
 
 ### Testing with Sample Data
+Sample Data files stored under the directory `sample_inputs`. You can test the programm by running:
 
 ```
 python3 -m geektrust sample_inputs/not_rebalaceable.txt
