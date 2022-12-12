@@ -10,7 +10,7 @@ from math import floor
 
 from src.conversion import DataConverter
 from src.sanitization import DataSanitizer
-from src.manipulation import DateManupulationServices
+from src.manipulation import ManageDate
 
 from src.constants import SIP
 from src.constants import CHANGE
@@ -20,22 +20,25 @@ from src.constants import REBALANCE
 from src.constants import REBALANCE_ERROR
 
 
-class PortfolioTracker:
-    def __init__(self) -> None:
+class ManagePortfolio:
+    """Investment Portfolio Tracker Module."""
+
+    def __init__(self, file_path: str) -> None:
         try:
-            file_path = sys.argv[1]
             if not os.path.isfile(file_path):
                 print(
-                    f'Invalid File: to run file execute "python3 geektrust.py <file_path>"'
+                    f'Invalid Input: Please input the absolute path of the file'
                 )
                 sys.exit(1)
 
         except IndexError:
-            print(f'Error: Supply a file path')
+            print(f'Error: File path should be absolute path!')
             sys.exit(1)
 
         except TypeError:
-            print(f'Error: to run the file execute "python3 geektrust.py <file_path>"')
+            print(
+                f'Error: Exacute "python3 geektrust.py <file_path>" with the file.'
+            )
             sys.exit(1)
 
         self.file_path = file_path
@@ -44,11 +47,10 @@ class PortfolioTracker:
     def initialize_monthly_data(self) -> None:
         """Portfolio Setter.
 
-        Sets the initial porfolio for equity, debt and gold
-        January is set to the initial allocation while the
-        other months are set to 0.
+        Sets the initial porfolio for equity, debt and gold. JAN is set to the
+        initial allocation month while the other months are set to zero (0).
         """
-        months_of_the_year = DateManupulationServices.get_get_all_months()[1:]
+        months_of_the_year = ManageDate.get_get_all_months()[1:]
         self.monthly_data = {key: [0, 0, 0] for key in months_of_the_year}
         self.monthly_data[months_of_the_year.pop(0)] = [
             self.equity_allocation,
@@ -57,18 +59,14 @@ class PortfolioTracker:
         ]
 
     def track_portfolio(self) -> None:
-        """Read investment data.
+        """Read investment data."""
 
-        This is the main method opens the input file,
-        reads it line by line and calls the method that
-        execute the command on the line.
-        """
         with open(self.file_path, 'r') as commands_file:
             for command_parameters in commands_file.readlines():
-                self.execute_next_command(command_parameters)
+                self.run_input_command(command_parameters)
 
-    def execute_next_command(self, command_parameters: str) -> None:
-        """This method takes command parameters, and execute the command 
+    def run_input_command(self, command_parameters: str) -> None:
+        """This method takes command params, and execute the command
         appropriate command.
         """
         command = command_parameters.split(' ')[0]
@@ -80,7 +78,7 @@ class PortfolioTracker:
             self.initialize_monthly_data()
 
         elif command == SIP:
-            self.set_sip_values(cleaned_data)
+            self.set_sip_value(cleaned_data)
 
         elif command == CHANGE:
             self.set_change_rates(cleaned_data)
@@ -94,14 +92,14 @@ class PortfolioTracker:
 
         else:
             print(
-                f'Please enter a valid command. choices are: ALLOCATE, SIP, '
-                f'CHANGE, BALANCE, REBALANCE'
+                f'Invalid Input: Please provide the following options - '
+                f'ALLOCATE, SIP, CHANGE, BALANCE, REBALANCE'
             )
             sys.exit(1)
 
     def allocate_funds(self, allocation_amounts: list) -> None:
-        """This method takes a list of the initial allocation amounts and set 
-        the respective variables.
+        """This method uses a list of the initial allocation amounts and set
+        the required variables.
         """
         try:
             (
@@ -117,7 +115,7 @@ class PortfolioTracker:
 
         except ValueError:
             print(
-                f'Please supply a valid command format is: ALLOCATE '
+                f'Invalid Input: available options are: ALLOCATE '
                 f'AMOUNT_EQUITY AMOUNT_DEBT AMOUNT_GOLD'
             )
             exit(1)
@@ -126,16 +124,14 @@ class PortfolioTracker:
         equity, debt, gold = self.monthly_data.get(month)
         print(f'{equity} {debt} {gold}')
 
-    def get_rebalance_month_data(self) -> list:
+    def get_rebalanced_monthly_data(self) -> list:
+        """Determines the month that should be rebalanced. Either JUN or DEC.
+        If DEC data is provided, it will be the rebalance the month, if DEC is
+        not available and JUN is available, JUN is returned as the rebalance month
+        if none is available, it return the error.
         """
-        This method determines the month that should be rebalanced.
-        It is either June or December. If December data is available,
-        it will be the rebalance month, if December is not available
-        and June is available, June is returned as the rebalance month
-        if none is available, then rebalance error is returned.
-        """
-        june = DateManupulationServices.get_get_all_months()[6]
-        december = DateManupulationServices.get_get_all_months()[12]
+        june = ManageDate.get_get_all_months()[6]
+        december = ManageDate.get_get_all_months()[12]
         december_data = self.monthly_data.get(december)
         june_data = self.monthly_data.get(june)
 
@@ -153,14 +149,14 @@ class PortfolioTracker:
         return [month_to_rebalance_data, rebalance_month]
 
     def rebalance_investment(self) -> None:
-        """This rebalances the investment portfolio across, equity, debt and 
+        """Rebalances the investment portfolio across, equity, debt and
         gold using the respective desired percentages.
         """
         try:
             (
                 rebalance_month_data,
                 rebalance_month,
-            ) = self.get_rebalance_month_data()
+            ) = self.get_rebalanced_monthly_data()
 
         except ValueError:
             print(REBALANCE_ERROR)
@@ -183,9 +179,8 @@ class PortfolioTracker:
         ]
         print(f'{rebalanced_equity} {rebalanced_debt} {rebalanced_gold}')
 
-    def set_sip_values(self, monthly_sip_data: dict) -> bool:
-        """This method sets the SIP values.
-        """
+    def set_sip_value(self, monthly_sip_data: dict) -> bool:
+        """This method sets the SIP values."""
         successful = True
         try:
             (
@@ -193,9 +188,7 @@ class PortfolioTracker:
                 self.debt_sip,
                 self.gold_sip,
             ) = DataConverter.convert_to_int(monthly_sip_data)
-            self.monthly_data[
-                DateManupulationServices.get_get_all_months()[0]
-            ] = [
+            self.monthly_data[ManageDate.get_get_all_months()[0]] = [
                 self.equity_sip,
                 self.debt_sip,
                 self.gold_sip,
@@ -206,8 +199,7 @@ class PortfolioTracker:
         return successful
 
     def set_change_rates(self, change_rate: list) -> bool:
-        """This method sets the CHANGE rates.
-        """
+        """This method sets the CHANGE rates."""
         successful = True
         try:
             (
@@ -224,10 +216,10 @@ class PortfolioTracker:
         return successful
 
     def calculate_portfolio_after_change(self, month: str) -> None:
-        """This method calculates the porfolio after the change has taken effect. 
-        SIP is added on monthly basis starting from February. All data is a 
-        cummulation of the previous month portfolio and the respective sip, 
-        except for January which is the initial month.
+        """Calculates the porfolio after the change has taken effect.
+        SIP is added on monthly basis starting from FEB. All data is a
+        cummulation of the previous month portfolio and the respective SIP,
+        except for JAN which is the Initial Month.
         """
         equity_sip = 0
         debt_sip = 0
@@ -236,12 +228,8 @@ class PortfolioTracker:
             previous_equity,
             previous_debt,
             previous_gold,
-        ) = DateManupulationServices.get_previous_month_data(
-            self.monthly_data, month
-        )
-        if (
-            month != DateManupulationServices.get_get_all_months()[1]
-        ):  # if not January
+        ) = ManageDate.get_previous_month_data(self.monthly_data, month)
+        if month != ManageDate.get_get_all_months()[1]:  # if not January
             gold_sip = self.gold_sip
             debt_sip = self.debt_sip
             equity_sip = self.equity_sip
@@ -269,9 +257,7 @@ class PortfolioTracker:
         return None
 
     def calculate_desired_percentages(self) -> None:
-        """Function to set the desired percentages which is derived from the 
-        allocation ratio.
-        """
+        """Set the desired percentages which is derived from the allocation ratio."""
         self.desired_equity_percentage = (
             self.equity_allocation / self.total_allocation
         )

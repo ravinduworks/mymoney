@@ -6,12 +6,8 @@
 import calendar
 
 
-class DateManupulationServices:
-    @staticmethod
-    def get_get_all_months() -> list:
-        """Returns a list of all the months(JAN-DEC)"""
-        months = list(map(str.upper, calendar.month_name))
-        return months
+class ManageDate:
+    """Data Manupulater Module"""
 
     @classmethod
     def get_previous_month(cls, current_month) -> list:
@@ -35,3 +31,9 @@ class DateManupulationServices:
         previous_month = cls.get_previous_month(current_month)
         previous_month_data = monthly_data.get(previous_month)
         return previous_month_data
+
+    @staticmethod
+    def get_get_all_months() -> list:
+        """Returns a list of all the months(JAN-DEC)"""
+        months = list(map(str.upper, calendar.month_name))
+        return months

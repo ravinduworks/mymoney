@@ -3,11 +3,14 @@
 
 """MyMoney App Entrypoint"""
 
-from src.__main__ import PortfolioTracker
+import sys
+
+from src.__main__ import ManagePortfolio
 
 
 def main():
-    portfolio_tracker = PortfolioTracker()
+    file_path = sys.argv[1]
+    portfolio_tracker = ManagePortfolio(file_path=file_path)
     portfolio_tracker.track_portfolio()
 
 
