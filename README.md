@@ -64,12 +64,17 @@ We build and run the solution by using the following commands
 ```
 cd mymoney
 python3 -m pip install -r requirements.txt
+```
+
+### Testing with Sample Data
+
+```
 python3 -m geektrust sample_inputs/not_rebalaceable.txt
 python3 -m geektrust sample_inputs/rebalaceable.txt
 
 ```
 
-# Unit tests
+### Unit tests
 
 For Python we currently support only the inbuilt [unittest](https://docs.python.org/3/library/unittest.html) framework. For test coverage we use [Coverage](https://coverage.readthedocs.io/en/coverage-5.5/) framework. 
 
