@@ -72,7 +72,6 @@ Sample Data files stored under the directory `sample_inputs`. You can test the p
 ```
 python3 -m geektrust sample_inputs/not_rebalaceable.txt
 python3 -m geektrust sample_inputs/rebalaceable.txt
-
 ```
 
 ### Unit tests
